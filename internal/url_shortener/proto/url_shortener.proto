@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package shortenerService;
+option go_package = ".;shortenerService";
+
+message UCRequest {
+    string longUrl = 1;
+}
+
+message UCResponse {
+    string shortUrl = 1;
+}
+
+message UGRequest {
+    string shortUrl = 1;
+}
+
+message UGResponse {
+    string longUrl = 1;
+}
+
+service UrlShortenerService {
+    rpc Create(UCRequest) returns (UCResponse);
+    rpc Get(UGRequest) returns (UGResponse);
+}
