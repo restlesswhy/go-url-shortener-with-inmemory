@@ -6,6 +6,7 @@ import (
 
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/server"
+	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/postgres"
 )
 
 func main() {
@@ -17,6 +18,12 @@ func main() {
 		log.Fatalf("cant get config: %v", err)
 	}
 
-	s := server.NewServer(cfg)
+	psqlDB, err := postgres.NewPsqlDB(cfg)
+	if err != nil {
+		log.Fatalf("Postgresql init: %s", err)
+	}
+	defer psqlDB.Close()
+
+	s := server.NewServer(cfg, psqlDB)
 	s.Run()
 }

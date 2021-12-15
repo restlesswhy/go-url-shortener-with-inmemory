@@ -26,6 +26,7 @@ require (
 require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jmoiron/sqlx v1.3.4
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.10.0
 	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
 	golang.org/x/sys v0.0.0-20211214170744-3b038e5940ed // indirect
