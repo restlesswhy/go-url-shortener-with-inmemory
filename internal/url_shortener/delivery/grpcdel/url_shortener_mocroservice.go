@@ -22,7 +22,10 @@ func NewUrlShortenerMicroservice(cfg *config.Config, shortenerUC us.UrlShortener
 }
 
 func (u *UrlShortenerMicroservice) Create(ctx context.Context, in *pb.UCRequest) (*pb.UCResponse, error) {
-	return nil, nil
+
+	return &pb.UCResponse{
+		ShortUrl: "hi there",
+	}, nil
 }
 
 func (u *UrlShortenerMicroservice) Get(ctx context.Context, in *pb.UGRequest) (*pb.UGResponse, error) {
