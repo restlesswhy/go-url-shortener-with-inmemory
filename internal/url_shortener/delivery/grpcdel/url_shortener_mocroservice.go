@@ -10,6 +10,7 @@ import (
 type UrlShortenerMicroservice struct {
 	pb.UnimplementedUrlShortenerServiceServer
 	cfg *config.Config
+	
 }
 
 func NewUrlShortenerMicroservice(cfg *config.Config) *UrlShortenerMicroservice{
