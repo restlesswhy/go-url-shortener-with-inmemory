@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -18,12 +19,7 @@ type Logger struct {
 }
 
 type ServerConfig struct {
-	AppVersion        string
 	Port              string
-	PprofPort         string
-	Mode              string
-	JwtSecretKey      string
-	CookieName        string
 	ReadTimeout       time.Duration
 	WriteTimeout      time.Duration
 	SSL               bool

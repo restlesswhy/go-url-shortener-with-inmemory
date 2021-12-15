@@ -2,6 +2,10 @@ package server
 
 import (
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
@@ -9,7 +13,9 @@ import (
 	shortenerService "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/proto"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/repository"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/usecase"
+	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 )
 
 type Server struct {
@@ -34,10 +40,28 @@ func (s *Server) Run() error {
 	shortenerRepository := repository.NewUrlShortenerRepository(s.db)
 	shortenerUseCase := usecase.NewUrlShortenerUC(s.cfg, shortenerRepository)
 
-	server := grpc.NewServer()
-	shortener := grpcdel.NewUrlShortenerMicroservice(s.cfg)
+	server := grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{
+		MaxConnectionIdle: s.cfg.Server.MaxConnectionIdle * time.Minute,
+		Timeout:           s.cfg.Server.Timeout * time.Second,
+		MaxConnectionAge:  s.cfg.Server.MaxConnectionAge * time.Minute,
+		Time:              s.cfg.Server.Timeout * time.Minute,
+	}))
+	shortener := grpcdel.NewUrlShortenerMicroservice(s.cfg, shortenerUseCase)
 	shortenerService.RegisterUrlShortenerServiceServer(server, shortener)
 	
-	server.Serve(l)
+	go func() {
+		logger.Infof("Server is listening on port: %v", s.cfg.Server.Port)
+		logger.Fatal(server.Serve(l))
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	
+	<-quit
+	
+
+	server.GracefulStop()
+	logger.Info("Server Exited Properly")
+
 	return nil
 }

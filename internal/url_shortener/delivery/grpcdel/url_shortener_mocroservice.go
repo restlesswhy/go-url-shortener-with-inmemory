@@ -4,18 +4,20 @@ import (
 	"context"
 
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
+	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
 	pb "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/proto"
 )
 
 type UrlShortenerMicroservice struct {
 	pb.UnimplementedUrlShortenerServiceServer
 	cfg *config.Config
-	
+	shortenerUC us.UrlShortenerUseCase
 }
 
-func NewUrlShortenerMicroservice(cfg *config.Config) *UrlShortenerMicroservice{
+func NewUrlShortenerMicroservice(cfg *config.Config, shortenerUC us.UrlShortenerUseCase) *UrlShortenerMicroservice{
 	return &UrlShortenerMicroservice{
 		cfg: cfg,
+		shortenerUC: shortenerUC,
 	}
 }
 
