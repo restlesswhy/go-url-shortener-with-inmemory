@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  url_shortener_microservice:
+    container_name: url_shortener_microservice
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    ports:
+      - 5000:5000
+    # environment:
+    #   - PORT=5000
+    networks:
+      - new
+    depends_on:
+      - postgresql
+    restart: always
+    volumes:
+      - ./:/app
+
+  postgresql:
+    image: postgres:13-alpine
+    networks:
+      new:
+        aliases:
+          - database
+    container_name: url_shortener_postge
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  migrate:
+    image: migrate/migrate
+    networks:
+      - new
+    depends_on:
+      - postgresql
+    links: 
+      - postgresql
+
+    volumes:
+      - ./migrations:/migrations
+    # here instead of localhost as the host we use databaseservicename as that is the name we gave to the postgres service
+    command:
+      [ "-path", "/migrations", "-database",  "postgres://postgres:postgres@database:5432/postgres?sslmode=disable", "up" ]
+
+networks:
+  new:

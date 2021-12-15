@@ -22,10 +22,7 @@ type ServerConfig struct {
 	Port              string
 	ReadTimeout       time.Duration
 	WriteTimeout      time.Duration
-	SSL               bool
 	CtxDefaultTimeout time.Duration
-	CSRF              bool
-	Debug             bool
 	MaxConnectionIdle time.Duration
 	Timeout           time.Duration
 	MaxConnectionAge  time.Duration
@@ -87,5 +84,5 @@ func GetConfigPath(configPath string) string {
 		return "some path"
 	}
 	
-	return "./config/config-local"
+	return "./config/config"
 }

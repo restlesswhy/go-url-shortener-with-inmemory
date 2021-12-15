@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
@@ -24,8 +25,8 @@ func NewPsqlDB(c *config.Config) (*sqlx.DB, error) {
 		c.Postgres.PostgresqlDbname,
 		c.Postgres.PostgresqlPassword,
 	)
-
-	db, err := sqlx.Connect(c.Postgres.PgDriver, dataSourceName)
+	
+	db, err := sqlx.Open(c.Postgres.PgDriver, dataSourceName)
 	if err != nil {
 		return nil, errors.Wrap(err, "sqlx.Connect")
 	}
