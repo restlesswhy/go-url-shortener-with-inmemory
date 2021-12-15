@@ -2,10 +2,12 @@ package grpcdel
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
 	pb "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/proto"
+	"google.golang.org/grpc/status"
 )
 
 type UrlShortenerMicroservice struct {
@@ -22,9 +24,13 @@ func NewUrlShortenerMicroservice(cfg *config.Config, shortenerUC us.UrlShortener
 }
 
 func (u *UrlShortenerMicroservice) Create(ctx context.Context, in *pb.UCRequest) (*pb.UCResponse, error) {
+	shortUrl, err := u.shortenerUC.Create(ctx, in.LongUrl)
+	if err != nil {
+		return nil, status.Errorf(400, "u.shortenerUC.Create: %v", err)	
+	}
 
 	return &pb.UCResponse{
-		ShortUrl: "hi there",
+		ShortUrl: fmt.Sprintf("Short url: %s", shortUrl),
 	}, nil
 }
 

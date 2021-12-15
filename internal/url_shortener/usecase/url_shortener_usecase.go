@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
 )
@@ -14,4 +16,8 @@ func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerReposito
 	return &UrlShortenerUC{
 		cfg: cfg,
 	}
+}
+
+func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, error) {
+	return u.shortenerRepo.Create(ctx, longUrl)
 }

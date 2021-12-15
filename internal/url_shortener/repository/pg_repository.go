@@ -1,6 +1,10 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"context"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type UrlShortenerRepository struct {
 	db *sqlx.DB
@@ -12,3 +16,7 @@ func NewUrlShortenerRepository(db *sqlx.DB) *UrlShortenerRepository {
 	}
 }
 
+func (u *UrlShortenerRepository) Create(ctx context.Context, longUrl string) (string, error) {
+	
+	return "", nil
+}
