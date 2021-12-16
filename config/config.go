@@ -8,14 +8,9 @@ import (
 )
 
 type Config struct {
-	Logger Logger
-	Postgres PostgresConfig
-	Server ServerConfig
-}
-
-type Logger struct {
-	Encoding string
-	Level string
+	Postgres  PostgresConfig
+	Server    ServerConfig
+	Shortener ShortenerConfig
 }
 
 type ServerConfig struct {
@@ -37,6 +32,11 @@ type PostgresConfig struct {
 	PostgresqlDbname   string
 	PostgresqlSSLMode  bool
 	PgDriver           string
+}
+
+type ShortenerConfig struct {
+	StringLength int
+	Runes        string
 }
 
 func Loadconfig(configName string) (*viper.Viper, error) {
@@ -83,6 +83,6 @@ func GetConfigPath(configPath string) string {
 	if configPath == "some" {
 		return "some path"
 	}
-	
+
 	return "./config/config"
 }

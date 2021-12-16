@@ -1,10 +1,16 @@
 FROM golang:1.17-buster
 
 ENV config=docker
-
+# ENV GOPATH=/
 WORKDIR /app
 
 COPY ./ /app
+# COPY ./ ./
+
+# RUN apt-get update
+# RUN apt-get -y install postgresql-client
+
+# RUN chmod +x wait-for-postgres.sh
 
 RUN go mod download
 

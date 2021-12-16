@@ -8,7 +8,6 @@ server:
   MaxConnectionAge: 5
   Time: 120
 
-
 postgres:
   PostgresqlHost: "database"
   PostgresqlPort: 5432
@@ -17,3 +16,7 @@ postgres:
   PostgresqlDbname: postgres
   PostgresqlSslmode: false
   PgDriver: pgx
+
+shortener:
+  StringLength: 10
+  Runes: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"

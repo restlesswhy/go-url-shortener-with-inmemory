@@ -25,6 +25,7 @@ require (
 )
 
 require (
+	github.com/cristalhq/base64 v0.1.2
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jmoiron/sqlx v1.3.4

@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"context"
-	"fmt"
-	// "fmt"
 
+	"github.com/cristalhq/base64"
+	"github.com/pkg/errors"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
 )
@@ -23,13 +23,23 @@ func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerReposito
 
 func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, error) {
 
-	shortUrl := "asdads"
-	fmt.Println(shortUrl)
-	x, err := u.shortenerRepo.Create(ctx, longUrl, shortUrl)
-	if err != nil {
-		fmt.Println(err)
+	shortUrl := getUniqueString(longUrl)
+
+	urlIsExist, err := u.shortenerRepo.Create(ctx, longUrl, shortUrl)
+	if urlIsExist && err == nil {
+		// TODO добавляем в in-memory
+		return shortUrl, err
 	}
-	fmt.Println(x)
-	// return u.shortenerRepo.Create(ctx, longUrl, shortUrl)
-	return x, nil
+
+	if err != nil {
+		return shortUrl, errors.Wrap(err, "u.shortenerRepo.Create")
+	}
+	
+	return shortUrl, nil
 }
+
+func getUniqueString(longUrl string) string {
+	shortUrl := base64.RawURLEncoding.EncodeStringToString(longUrl)
+	return shortUrl[len(shortUrl)-10:]
+}
+
