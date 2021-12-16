@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
+	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
 )
 
 type UrlShortenerUC struct {
@@ -26,27 +27,26 @@ func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerReposito
 
 func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, error) {
 	
-	shortUrl, err := u.memdb.GetLongInmemory(longUrl)
+
+	shortUrl, err := u.memdb.GetShortInmemory(longUrl)
 	if err != nil {
 		return shortUrl, err
 	}
 
 	if shortUrl == "" {
-		shortUrl, err = u.shortenerRepo.GetRepo(ctx, longUrl)
+		shortUrl = getUniqueString(longUrl)
+		urls, err := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl)
 		if err == nil {
-			if err := u.memdb.CreateInmemory(shortUrl, longUrl); err != nil {
+			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
 		}
-
+		logger.Infof("urls in model: %s, %s", urls.LongUrl, urls.ShortUrl)
 		if err == sql.ErrNoRows {
-			shortUrl = getUniqueString(longUrl)
-			
 			if err := u.memdb.CreateInmemory(shortUrl, longUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
 			if err := u.shortenerRepo.CreateRepo(ctx, longUrl, shortUrl); err != nil {
-				// u.memdb.Printmem(shortUrl+"aasf3")
 				return shortUrl, errors.Wrap(err, "u.shortenerRepo.CreateRepo")
 			}
 			
@@ -56,8 +56,26 @@ func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, er
 }
 
 func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, error) {
-	// longUrl := u.memdb.GetInmemory()
-	return "", nil
+	longUrl, err := u.memdb.GetLongInmemory(shortUrl)
+	if err != nil {
+		return shortUrl, err
+	}
+
+	if longUrl == "" {
+		urls, err := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl)
+		if err == nil {
+			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil {
+				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
+			}
+		}
+		if err == sql.ErrNoRows {
+			return "have no long url", nil
+		}
+		longUrl = urls.LongUrl
+
+	}
+
+	return longUrl, nil
 }
 
 func getUniqueString(longUrl string) string {

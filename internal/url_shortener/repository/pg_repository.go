@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/models"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
 )
 
@@ -38,18 +39,20 @@ func (u *UrlShortenerRepository) CreateRepo(ctx context.Context, longUrl string,
 }
 
 
-func (u *UrlShortenerRepository) GetRepo(ctx context.Context, longUrl string) (string, error) {
+func (u *UrlShortenerRepository) GetRepo(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, error) {
 	logger.Info("serching url in repo")
 
-	var resUrl string
+	var urls models.UrlsLS
+	// var resUrl string
 
-	query := fmt.Sprintf("SELECT short_url FROM %s WHERE long_url = $1", urlsTable)
-	err := u.db.QueryRow(query, longUrl).Scan(&resUrl)
+	query := fmt.Sprintf("SELECT short_url, long_url FROM %s WHERE long_url = $1 OR short_url = $2", urlsTable)
+	err := u.db.Get(&urls, query, longUrl, shortUrl)
+	// err := u.db.QueryRow(query, longUrl, shortUrl).Scan(&resUrl)
 	if err == sql.ErrNoRows {
 		logger.Info("have no url in repo")
-		return "", err
+		return urls, err
 	}
-	logger.Infof("found this in repo - %s", resUrl)
-	return resUrl, err
+	logger.Infof("found this in repo - %s", urls.ShortUrl)
+	return urls, err
 	
 }

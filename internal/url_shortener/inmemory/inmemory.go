@@ -24,7 +24,7 @@ func NewUrlShortenerInmemory(memdb *memdb.MemDB) *UrlShortenerInmemory {
 
 func (u *UrlShortenerInmemory) CreateInmemory(shortUrl, longUrl string) error {
 	logger.Info("creating new url in inmemory")
-	
+	logger.Info(shortUrl, longUrl)
 	var err error
 
 	txn := u.memdb.Txn(true)
@@ -43,7 +43,7 @@ func (u *UrlShortenerInmemory) CreateInmemory(shortUrl, longUrl string) error {
 	return nil
 }
 
-func (u *UrlShortenerInmemory) GetLongInmemory(longUrl string) (string, error) {
+func (u *UrlShortenerInmemory) GetShortInmemory(longUrl string) (string, error) {
 	defer func() {
         if err := recover(); err != nil {
 			logger.Info("have no in memdb")
@@ -59,4 +59,22 @@ func (u *UrlShortenerInmemory) GetLongInmemory(longUrl string) (string, error) {
 	shortUrl := raw.(*Urls).ShortUrl
 	logger.Infof("found url in inmemory - %s", shortUrl)
 	return shortUrl, nil
+}
+
+func (u *UrlShortenerInmemory) GetLongInmemory(shortUrl string) (string, error) {
+	defer func() {
+        if err := recover(); err != nil {
+			logger.Info("have no in memdb")
+        }
+    }()
+
+	logger.Info("serching in inmemory")
+	txn := u.memdb.Txn(false)
+	defer txn.Abort()
+	// txn.First()
+	raw, _ := txn.First("urls", "id", shortUrl)
+	
+	longUrl := raw.(*Urls).LongUrl
+	logger.Infof("found url in inmemory - %s", longUrl)
+	return longUrl, nil
 }
