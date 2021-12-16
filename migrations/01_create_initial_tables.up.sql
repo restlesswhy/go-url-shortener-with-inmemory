@@ -1,5 +1,6 @@
 CREATE TABLE urls
 (
-    short_url varchar(255) PRIMARY KEY,
+    id serial not null unique,
+    short_url varchar(255) not null unique,
     long_url varchar(255) not null unique
 );

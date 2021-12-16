@@ -18,10 +18,12 @@ func main() {
 	client := shortenerService.NewUrlShortenerServiceClient(conn)
 
 
-	resp, err := client.Create(context.Background(), &shortenerService.UCRequest{})
+	resp, err := client.Create(context.Background(), &shortenerService.UCRequest{
+		LongUrl: "asdasdasdasdasd",
+	})
 	if err != nil {
 		log.Fatalf("could not get answer: %v", err)
 	}
 
-	log.Println("New password:", string(resp.GetShortUrl()))
+	log.Println("Short url:", resp.ShortUrl)
 }
