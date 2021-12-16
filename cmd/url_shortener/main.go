@@ -8,6 +8,7 @@ import (
 	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/server"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/postgres"
+	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/memdb"
 )
 
 func main() {
@@ -25,7 +26,12 @@ func main() {
 	}
 	defer psqlDB.Close()
 
-	s := server.NewServer(cfg, psqlDB)
+	memdb, err := inmemory.InitMemDB()
+	if err != nil {
+		logger.Fatalf("Memdb init: %s", err)
+	}
+
+	s := server.NewServer(cfg, psqlDB, memdb)
 	
 	logger.Fatal(s.Run())
 }
