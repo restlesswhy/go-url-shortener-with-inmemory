@@ -28,6 +28,11 @@ func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerReposito
 
 // Create is create new short url
 func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, error) {
+	if longUrl == "" {
+		logger.Error("empty string in UrlShortenerUC.create")
+		return "your url is empty", nil
+	}
+
 	logger.Infof("New creating with long url===============>%s", longUrl)
 	
 	shortUrl, err := u.memdb.GetShortInmemory(longUrl) // Проверяем есть ли урл в локальном хранилище 
@@ -39,15 +44,15 @@ func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, er
 		shortUrl = getUniqueString(longUrl)
 
 		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
-		if !ok { // Если урл найден в базе, сохраняем его локально и возвращаем найденный урл
-			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil {
+		if ok { // Если урл найден в базе, сохраняем его локально и возвращаем найденный урл
+			if err := u.memdb.CreateInmemory(shortUrl, longUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
 			return urls.ShortUrl, nil
 		}
 
-		logger.Infof("urls in model: %s, %s", urls.LongUrl, urls.ShortUrl)
-		if ok { // Если урл не найден в базе, создаем урл в базе и локально, и возвращаем созданный урл если все прошло успешно
+		// logger.Infof("urls in model: %s, %s", urls.LongUrl, urls.ShortUrl)
+		if !ok { // Если урл не найден в базе, создаем урл в базе и локально, и возвращаем созданный урл если все прошло успешно
 			if err := u.shortenerRepo.CreateRepo(ctx, longUrl, shortUrl); err != nil {
 				return "", errors.Wrap(err, "u.shortenerRepo.CreateRepo")
 			}
@@ -57,11 +62,17 @@ func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, er
 			return shortUrl, nil
 		}
 	}
-	return "", errors.Wrap(errors.New("something went wrong"), "u.shortenerUC.Create")
+	return shortUrl, nil
+	// return "", errors.Wrap(errors.New("something went wrong"), "u.shortenerUC.Create")
 }
 
 // Get return long url
 func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, error) {
+	if shortUrl == "" {
+		logger.Error("empty string in UrlShortenerUC.get")
+		return "your url is empty", nil
+	}
+
 	logger.Infof("New getting with short url===============>%s", shortUrl)
 
 	longUrl, err := u.memdb.GetLongInmemory(shortUrl) // Проверяем есть ли урл локально
@@ -71,14 +82,14 @@ func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, erro
 
 	if longUrl == "" { // Если локально длинный урл не найден ищем в базе 
 		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
-		if !ok { // Если урл найден в базе, создаем его локально и возвращаем
+		if ok { // Если урл найден в базе, создаем его локально и возвращаем
 			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil { 
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
 			return urls.LongUrl, nil
 		}
 
-		if ok { // Если в базе урл не найден, сообщаем об этом
+		if !ok { // Если в базе урл не найден, сообщаем об этом
 			return "this short url is not exist", nil
 		}
 		longUrl = urls.LongUrl

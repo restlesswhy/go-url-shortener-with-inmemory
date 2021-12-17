@@ -24,6 +24,7 @@ func NewUrlShortenerRepository(db *sqlx.DB) *UrlShortenerRepository {
 	}
 }
 
+// CreateRepo insert url in repository
 func (u *UrlShortenerRepository) CreateRepo(ctx context.Context, longUrl string, shortUrl string) error {
 	logger.Info("creating new url in repo")
 
@@ -33,12 +34,12 @@ func (u *UrlShortenerRepository) CreateRepo(ctx context.Context, longUrl string,
 		return err
 	}
 
-	logger.Infof("added: longUrl - %s, shortUrl - %s", longUrl, shortUrl)
+	logger.Infof("added to repo: longUrl - %s, shortUrl - %s", longUrl, shortUrl)
 
 	return nil
 }
 
-
+// GetRepo search url in repository
 func (u *UrlShortenerRepository) GetRepo(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, bool) {
 	logger.Info("serching url in repo")
 	var isExist bool
@@ -57,7 +58,7 @@ func (u *UrlShortenerRepository) GetRepo(ctx context.Context, longUrl, shortUrl 
 		logger.Errorf("select error: %s", err)
 		return urls, isExist
 	}
-	
+
 	isExist = true
 
 	logger.Infof("found this in repo - %s", urls.ShortUrl)

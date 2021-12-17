@@ -24,7 +24,7 @@ func NewUrlShortenerInmemory(memdb *memdb.MemDB) *UrlShortenerInmemory {
 // CreateInmemory create url in local memory
 func (u *UrlShortenerInmemory) CreateInmemory(shortUrl, longUrl string) error {
 	logger.Info("creating new url in inmemory")
-	logger.Info(shortUrl, longUrl)
+
 	var err error
 
 	txn := u.memdb.Txn(true)
@@ -39,8 +39,8 @@ func (u *UrlShortenerInmemory) CreateInmemory(shortUrl, longUrl string) error {
 
 	txn.Commit()
 
-	logger.Infof("added to memdb: shortUrl - %s, longUrl - %s", shortUrl, longUrl)
-	return err
+	logger.Infof("added to memdb: longUrl - %s, shortUrl - %s", longUrl, shortUrl)
+	return nil
 }
 
 // GetShortInmemory return short url if exist
@@ -71,7 +71,7 @@ func (u *UrlShortenerInmemory) GetLongInmemory(shortUrl string) (string, error) 
     }()
 
 	logger.Info("serching in inmemory")
-	
+
 	txn := u.memdb.Txn(false)
 	defer txn.Abort()
 
