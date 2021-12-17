@@ -8,5 +8,5 @@ import (
 
 type UrlShortenerRepository interface {
 	CreateRepo(ctx context.Context, longUrl, shortUrl string) error
-	GetRepo(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, error)
+	GetRepo(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, bool)
 }

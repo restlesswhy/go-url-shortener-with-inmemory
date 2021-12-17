@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/cristalhq/base64"
 	"github.com/pkg/errors"
@@ -11,12 +10,14 @@ import (
 	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
 )
 
+// UrlShortenerUC image useCase
 type UrlShortenerUC struct {
 	shortenerRepo us.UrlShortenerRepository
 	cfg *config.Config
 	memdb us.UrlShortenerInmemory
 }
 
+// NewUrlShortenerUC image useCase constructor
 func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerRepository, memdb us.UrlShortenerInmemory) *UrlShortenerUC {
 	return &UrlShortenerUC{
 		shortenerRepo: shortenerRepo,
@@ -25,59 +26,67 @@ func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerReposito
 	}
 }
 
+// Create is create new short url
 func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, error) {
+	logger.Infof("New creating with long url===============>%s", longUrl)
 	
-
-	shortUrl, err := u.memdb.GetShortInmemory(longUrl)
+	shortUrl, err := u.memdb.GetShortInmemory(longUrl) // Проверяем есть ли урл в локальном хранилище 
 	if err != nil {
 		return shortUrl, err
 	}
 
-	if shortUrl == "" {
+	if shortUrl == "" { // Если локально урл не найден, создаем для метода GetRepo и ищем в нем
 		shortUrl = getUniqueString(longUrl)
-		urls, err := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl)
-		if err == nil {
+
+		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
+		if !ok { // Если урл найден в базе, сохраняем его локально и возвращаем найденный урл
 			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
+			return urls.ShortUrl, nil
 		}
+
 		logger.Infof("urls in model: %s, %s", urls.LongUrl, urls.ShortUrl)
-		if err == sql.ErrNoRows {
+		if ok { // Если урл не найден в базе, создаем урл в базе и локально, и возвращаем созданный урл если все прошло успешно
+			if err := u.shortenerRepo.CreateRepo(ctx, longUrl, shortUrl); err != nil {
+				return "", errors.Wrap(err, "u.shortenerRepo.CreateRepo")
+			}
 			if err := u.memdb.CreateInmemory(shortUrl, longUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
-			if err := u.shortenerRepo.CreateRepo(ctx, longUrl, shortUrl); err != nil {
-				return shortUrl, errors.Wrap(err, "u.shortenerRepo.CreateRepo")
-			}
-			
+			return shortUrl, nil
 		}
 	}
-	return shortUrl, nil
+	return "", errors.Wrap(errors.New("something went wrong"), "u.shortenerUC.Create")
 }
 
+// Get return long url
 func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, error) {
-	longUrl, err := u.memdb.GetLongInmemory(shortUrl)
+	logger.Infof("New getting with short url===============>%s", shortUrl)
+
+	longUrl, err := u.memdb.GetLongInmemory(shortUrl) // Проверяем есть ли урл локально
 	if err != nil {
 		return shortUrl, err
 	}
 
-	if longUrl == "" {
-		urls, err := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl)
-		if err == nil {
-			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil {
+	if longUrl == "" { // Если локально длинный урл не найден ищем в базе 
+		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
+		if !ok { // Если урл найден в базе, создаем его локально и возвращаем
+			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil { 
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
+			return urls.LongUrl, nil
 		}
-		if err == sql.ErrNoRows {
-			return "have no long url", nil
+
+		if ok { // Если в базе урл не найден, сообщаем об этом
+			return "this short url is not exist", nil
 		}
 		longUrl = urls.LongUrl
-
 	}
-
 	return longUrl, nil
 }
 
+// getUniqueString create unique short url
 func getUniqueString(longUrl string) string {
 	shortUrl := base64.RawURLEncoding.EncodeStringToString(longUrl)
 	return shortUrl[len(shortUrl)-10:]
