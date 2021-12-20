@@ -6,9 +6,6 @@ services:
     build:
       context: ./
       dockerfile: docker/Dockerfile
-    # build: ./docker
-    # # command: ./wait-for-postgres.sh postgresql ./main
-    # command: ./main
     ports:
       - 5000:5000
     environment:
@@ -16,7 +13,11 @@ services:
     networks:
       - new
     depends_on:
-      - postgresql
+      postgresql:
+        condition: service_healthy
+      migrate:
+        condition: service_started
+
     restart: always
     volumes:
       - ./:/app
@@ -36,21 +37,26 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   migrate:
     image: migrate/migrate
     networks:
       - new
-    depends_on:
-      - postgresql
-    links: 
-      - postgresql
-
     volumes:
       - ./migrations:/migrations
     # here instead of localhost as the host we use databaseservicename as that is the name we gave to the postgres service
     command:
       [ "-path", "/migrations", "-database",  "postgres://postgres:postgres@database:5432/postgres?sslmode=disable", "up" ]
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    links: 
+      - postgresql
 
 networks:
   new:
