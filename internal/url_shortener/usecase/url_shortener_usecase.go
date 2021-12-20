@@ -3,11 +3,11 @@ package usecase
 import (
 	"context"
 
-	"github.com/cristalhq/base64"
 	"github.com/pkg/errors"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
+	"github.com/speps/go-hashids"
 )
 
 // UrlShortenerUC image useCase
@@ -41,7 +41,10 @@ func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, er
 	}
 
 	if shortUrl == "" { // Если локально урл не найден, создаем для метода GetRepo и ищем в нем
-		shortUrl = getUniqueString(longUrl)
+		shortUrl, err = u.getUniqueString(longUrl)
+		if err != nil {
+			return shortUrl, err
+		}
 
 		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
 		if ok { // Если урл найден в базе, сохраняем его локально и возвращаем найденный урл
@@ -98,8 +101,25 @@ func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, erro
 }
 
 // getUniqueString create unique short url
-func getUniqueString(longUrl string) string {
-	shortUrl := base64.RawURLEncoding.EncodeStringToString(longUrl)
-	return shortUrl[len(shortUrl)-10:]
+func (u *UrlShortenerUC) getUniqueString(longUrl string) (string, error) {
+	hd := hashids.NewData()
+	
+	hd.Salt = longUrl
+	hd.Alphabet = u.cfg.Shortener.Runes
+	hd.MinLength = u.cfg.Shortener.StringLength
+
+	h, err := hashids.NewWithData(hd)
+	if err != nil {
+		logger.Error("cant encode string")
+		return "", err
+	}
+
+	e, err := h.Encode([]int{45, 434, 1313, 99})
+	if err != nil {
+		logger.Error("cant encode string")
+		return "", err
+	}
+
+	return e, nil
 }
 
