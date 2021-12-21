@@ -20,6 +20,11 @@ func InitMemDB() (*memdb.MemDB, error) {
 						Unique:  true,
 						Indexer: &memdb.StringFieldIndex{Field: "LongUrl"},
 					},
+					"expiresAt": &memdb.IndexSchema{
+						Name: "expiresAt",
+						Unique: false,
+						Indexer: &memdb.StringFieldIndex{Field: "ExpiresAt"},
+					},
 				},
 			},
 		},

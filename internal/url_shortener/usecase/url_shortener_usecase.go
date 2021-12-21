@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"context"
+	"crypto/sha512"
+	"sync"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
@@ -13,29 +16,44 @@ import (
 // UrlShortenerUC image useCase
 type UrlShortenerUC struct {
 	shortenerRepo us.UrlShortenerRepository
-	cfg *config.Config
-	memdb us.UrlShortenerInmemory
+	cfg           *config.Config
+	memdb         us.UrlShortenerInmemory
 }
+
+type single struct {
+}
+
+var singleInstance *single
 
 // NewUrlShortenerUC image useCase constructor
 func NewUrlShortenerUC(cfg *config.Config, shortenerRepo us.UrlShortenerRepository, memdb us.UrlShortenerInmemory) *UrlShortenerUC {
 	return &UrlShortenerUC{
 		shortenerRepo: shortenerRepo,
-		cfg: cfg,
-		memdb: memdb,
+		cfg:           cfg,
+		memdb:         memdb,
 	}
 }
 
 // Create is create new short url
 func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, error) {
+	// Запускаем проверку времени урлов в inmemory через синглтон
+	var once sync.Once
+	if singleInstance == nil {
+        once.Do(
+            func() {
+				callAt(0, 0, 0, u.memdb.CheckInmemory)
+                singleInstance = &single{}
+            })
+    }
+
 	if longUrl == "" {
 		logger.Error("empty string in UrlShortenerUC.create")
 		return "your url is empty", nil
 	}
 
 	logger.Infof("New creating with long url===============>%s", longUrl)
-	
-	shortUrl, err := u.memdb.GetShortInmemory(longUrl) // Проверяем есть ли урл в локальном хранилище 
+
+	shortUrl, err := u.memdb.GetShortInmemory(longUrl) // Проверяем есть ли урл в локальном хранилище
 	if err != nil {
 		return shortUrl, err
 	}
@@ -46,7 +64,7 @@ func (u *UrlShortenerUC) Create(ctx context.Context, longUrl string) (string, er
 			return shortUrl, err
 		}
 
-		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
+		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, "")
 		if ok { // Если урл найден в базе, сохраняем его локально и возвращаем найденный урл
 			if err := u.memdb.CreateInmemory(shortUrl, longUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
@@ -83,10 +101,10 @@ func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, erro
 		return shortUrl, err
 	}
 
-	if longUrl == "" { // Если локально длинный урл не найден ищем в базе 
-		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl) 
+	if longUrl == "" { // Если локально длинный урл не найден ищем в базе
+		urls, ok := u.shortenerRepo.GetRepo(ctx, longUrl, shortUrl)
 		if ok { // Если урл найден в базе, создаем его локально и возвращаем
-			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil { 
+			if err := u.memdb.CreateInmemory(urls.ShortUrl, urls.LongUrl); err != nil {
 				return "", errors.Wrap(err, "u.memdb.CreateInmemory")
 			}
 			return urls.LongUrl, nil
@@ -102,9 +120,14 @@ func (u *UrlShortenerUC) Get(ctx context.Context, shortUrl string) (string, erro
 
 // getUniqueString create unique short url
 func (u *UrlShortenerUC) getUniqueString(longUrl string) (string, error) {
-	hd := hashids.NewData()
+	hash := sha512.New()
+	hash.Write([]byte(longUrl))
+	x := hash.Sum([]byte("some salt here"))
 	
-	hd.Salt = longUrl
+
+	hd := hashids.NewData()
+
+	hd.Salt = string(x)
 	hd.Alphabet = u.cfg.Shortener.Runes
 	hd.MinLength = u.cfg.Shortener.StringLength
 
@@ -114,7 +137,7 @@ func (u *UrlShortenerUC) getUniqueString(longUrl string) (string, error) {
 		return "", err
 	}
 
-	e, err := h.Encode([]int{45, 434, 1313, 99})
+	e, err := h.Encode([]int{434, 1313, 99})
 	if err != nil {
 		logger.Error("cant encode string")
 		return "", err
@@ -122,4 +145,35 @@ func (u *UrlShortenerUC) getUniqueString(longUrl string) (string, error) {
 
 	return e, nil
 }
+
+func callAt(hour, min, sec int, f func()) error {
+	loc, err := time.LoadLocation("Local")
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().Local()
+
+	firstCallTime := time.Date(
+		now.Year(), now.Month(), now.Day(), hour, min, sec, 0, loc)
+	if firstCallTime.Before(now) {
+		// Если получилось время раньше текущего, прибавляем сутки.
+		firstCallTime = firstCallTime.Add(time.Hour * 24)
+	}
+
+	// Вычисляем временной промежуток до запуска.
+	duration := firstCallTime.Sub(time.Now().Local())
+	logger.Info("callat")
+	go func() {
+		time.Sleep(duration)
+		for {
+			f()
+			// Следующий запуск через сутки.
+			time.Sleep(time.Hour * 24)
+		}
+	}()
+
+	return nil
+}
+
 
