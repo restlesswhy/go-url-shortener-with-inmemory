@@ -25,7 +25,8 @@ func NewUSMicroservice(cfg *config.Config, shortenerUC us.USUseCase) *USMicroser
 func (u *USMicroservice) Create(ctx context.Context, in *pb.UCRequest) (*pb.UCResponse, error) {
 	shortUrl, err := u.shortenerUC.Create(ctx, in.LongUrl)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Errorf("shortenerUC.Create: %v", err)
+		return nil, err
 	}
 
 	return &pb.UCResponse{
@@ -36,7 +37,7 @@ func (u *USMicroservice) Create(ctx context.Context, in *pb.UCRequest) (*pb.UCRe
 func (u *USMicroservice) Get(ctx context.Context, in *pb.UGRequest) (*pb.UGResponse, error) {
 	longUrl, err := u.shortenerUC.Get(ctx, in.ShortUrl)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Errorf("shortenerUC.Get: %v", err)
 		return nil, err
 	}
 

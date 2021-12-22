@@ -30,7 +30,7 @@ func (u *USRepository) Create(ctx context.Context, longUrl string, shortUrl stri
 	logger.Info("Creating new url in repo")
 
 	query := fmt.Sprintf("INSERT INTO %s (short_url, long_url) VALUES ($1, $2);", urlsTable)
-	_, err := u.db.Exec(query, shortUrl, longUrl)
+	_, err := u.db.ExecContext(ctx, query, shortUrl, longUrl)
 	if err != nil {
 		return errors.Wrap(err, "Create.Exec")
 	}
@@ -47,7 +47,7 @@ func (u *USRepository) Get(ctx context.Context, longUrl, shortUrl string) (model
 	var urls models.UrlsLS
 
 	query := fmt.Sprintf("SELECT short_url, long_url FROM %s WHERE long_url = $1 OR short_url = $2", urlsTable)
-	err := u.db.Get(&urls, query, longUrl, shortUrl)
+	err := u.db.GetContext(ctx, &urls, query, longUrl, shortUrl)
 	if err == sql.ErrNoRows {
 		logger.Info("Have no url in repo")
 		return urls, isExist, nil
