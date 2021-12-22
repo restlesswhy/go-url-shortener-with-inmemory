@@ -10,81 +10,83 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockUrlShortenerInmemory is a mock of UrlShortenerInmemory interface.
-type MockUrlShortenerInmemory struct {
+// MockUSInmemory is a mock of USInmemory interface.
+type MockUSInmemory struct {
 	ctrl     *gomock.Controller
-	recorder *MockUrlShortenerInmemoryMockRecorder
+	recorder *MockUSInmemoryMockRecorder
 }
 
-// MockUrlShortenerInmemoryMockRecorder is the mock recorder for MockUrlShortenerInmemory.
-type MockUrlShortenerInmemoryMockRecorder struct {
-	mock *MockUrlShortenerInmemory
+// MockUSInmemoryMockRecorder is the mock recorder for MockUSInmemory.
+type MockUSInmemoryMockRecorder struct {
+	mock *MockUSInmemory
 }
 
-// NewMockUrlShortenerInmemory creates a new mock instance.
-func NewMockUrlShortenerInmemory(ctrl *gomock.Controller) *MockUrlShortenerInmemory {
-	mock := &MockUrlShortenerInmemory{ctrl: ctrl}
-	mock.recorder = &MockUrlShortenerInmemoryMockRecorder{mock}
+// NewMockUSInmemory creates a new mock instance.
+func NewMockUSInmemory(ctrl *gomock.Controller) *MockUSInmemory {
+	mock := &MockUSInmemory{ctrl: ctrl}
+	mock.recorder = &MockUSInmemoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUrlShortenerInmemory) EXPECT() *MockUrlShortenerInmemoryMockRecorder {
+func (m *MockUSInmemory) EXPECT() *MockUSInmemoryMockRecorder {
 	return m.recorder
 }
 
-// CheckInmemory mocks base method.
-func (m *MockUrlShortenerInmemory) CheckInmemory() {
+// Check mocks base method.
+func (m *MockUSInmemory) Check() error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CheckInmemory")
-}
-
-// CheckInmemory indicates an expected call of CheckInmemory.
-func (mr *MockUrlShortenerInmemoryMockRecorder) CheckInmemory() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckInmemory", reflect.TypeOf((*MockUrlShortenerInmemory)(nil).CheckInmemory))
-}
-
-// CreateInmemory mocks base method.
-func (m *MockUrlShortenerInmemory) CreateInmemory(shortUrl, longUrl string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateInmemory", shortUrl, longUrl)
+	ret := m.ctrl.Call(m, "Check")
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateInmemory indicates an expected call of CreateInmemory.
-func (mr *MockUrlShortenerInmemoryMockRecorder) CreateInmemory(shortUrl, longUrl interface{}) *gomock.Call {
+// Check indicates an expected call of Check.
+func (mr *MockUSInmemoryMockRecorder) Check() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateInmemory", reflect.TypeOf((*MockUrlShortenerInmemory)(nil).CreateInmemory), shortUrl, longUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Check", reflect.TypeOf((*MockUSInmemory)(nil).Check))
 }
 
-// GetLongInmemory mocks base method.
-func (m *MockUrlShortenerInmemory) GetLongInmemory(shortUrl string) (string, error) {
+// Create mocks base method.
+func (m *MockUSInmemory) Create(shortUrl, longUrl string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetLongInmemory", shortUrl)
+	ret := m.ctrl.Call(m, "Create", shortUrl, longUrl)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockUSInmemoryMockRecorder) Create(shortUrl, longUrl interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUSInmemory)(nil).Create), shortUrl, longUrl)
+}
+
+// GetLong mocks base method.
+func (m *MockUSInmemory) GetLong(shortUrl string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLong", shortUrl)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetLongInmemory indicates an expected call of GetLongInmemory.
-func (mr *MockUrlShortenerInmemoryMockRecorder) GetLongInmemory(shortUrl interface{}) *gomock.Call {
+// GetLong indicates an expected call of GetLong.
+func (mr *MockUSInmemoryMockRecorder) GetLong(shortUrl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLongInmemory", reflect.TypeOf((*MockUrlShortenerInmemory)(nil).GetLongInmemory), shortUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLong", reflect.TypeOf((*MockUSInmemory)(nil).GetLong), shortUrl)
 }
 
-// GetShortInmemory mocks base method.
-func (m *MockUrlShortenerInmemory) GetShortInmemory(longUrl string) (string, error) {
+// GetShort mocks base method.
+func (m *MockUSInmemory) GetShort(longUrl string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetShortInmemory", longUrl)
+	ret := m.ctrl.Call(m, "GetShort", longUrl)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetShortInmemory indicates an expected call of GetShortInmemory.
-func (mr *MockUrlShortenerInmemoryMockRecorder) GetShortInmemory(longUrl interface{}) *gomock.Call {
+// GetShort indicates an expected call of GetShort.
+func (mr *MockUSInmemoryMockRecorder) GetShort(longUrl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShortInmemory", reflect.TypeOf((*MockUrlShortenerInmemory)(nil).GetShortInmemory), longUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShort", reflect.TypeOf((*MockUSInmemory)(nil).GetShort), longUrl)
 }

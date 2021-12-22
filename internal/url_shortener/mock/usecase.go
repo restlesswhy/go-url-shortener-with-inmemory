@@ -11,31 +11,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockUrlShortenerUseCase is a mock of UrlShortenerUseCase interface.
-type MockUrlShortenerUseCase struct {
+// MockUSUseCase is a mock of USUseCase interface.
+type MockUSUseCase struct {
 	ctrl     *gomock.Controller
-	recorder *MockUrlShortenerUseCaseMockRecorder
+	recorder *MockUSUseCaseMockRecorder
 }
 
-// MockUrlShortenerUseCaseMockRecorder is the mock recorder for MockUrlShortenerUseCase.
-type MockUrlShortenerUseCaseMockRecorder struct {
-	mock *MockUrlShortenerUseCase
+// MockUSUseCaseMockRecorder is the mock recorder for MockUSUseCase.
+type MockUSUseCaseMockRecorder struct {
+	mock *MockUSUseCase
 }
 
-// NewMockUrlShortenerUseCase creates a new mock instance.
-func NewMockUrlShortenerUseCase(ctrl *gomock.Controller) *MockUrlShortenerUseCase {
-	mock := &MockUrlShortenerUseCase{ctrl: ctrl}
-	mock.recorder = &MockUrlShortenerUseCaseMockRecorder{mock}
+// NewMockUSUseCase creates a new mock instance.
+func NewMockUSUseCase(ctrl *gomock.Controller) *MockUSUseCase {
+	mock := &MockUSUseCase{ctrl: ctrl}
+	mock.recorder = &MockUSUseCaseMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUrlShortenerUseCase) EXPECT() *MockUrlShortenerUseCaseMockRecorder {
+func (m *MockUSUseCase) EXPECT() *MockUSUseCaseMockRecorder {
 	return m.recorder
 }
 
 // Create mocks base method.
-func (m *MockUrlShortenerUseCase) Create(ctx context.Context, longUrl string) (string, error) {
+func (m *MockUSUseCase) Create(ctx context.Context, longUrl string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, longUrl)
 	ret0, _ := ret[0].(string)
@@ -44,13 +44,13 @@ func (m *MockUrlShortenerUseCase) Create(ctx context.Context, longUrl string) (s
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockUrlShortenerUseCaseMockRecorder) Create(ctx, longUrl interface{}) *gomock.Call {
+func (mr *MockUSUseCaseMockRecorder) Create(ctx, longUrl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUrlShortenerUseCase)(nil).Create), ctx, longUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUSUseCase)(nil).Create), ctx, longUrl)
 }
 
 // Get mocks base method.
-func (m *MockUrlShortenerUseCase) Get(ctx context.Context, shortUrl string) (string, error) {
+func (m *MockUSUseCase) Get(ctx context.Context, shortUrl string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, shortUrl)
 	ret0, _ := ret[0].(string)
@@ -59,7 +59,7 @@ func (m *MockUrlShortenerUseCase) Get(ctx context.Context, shortUrl string) (str
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockUrlShortenerUseCaseMockRecorder) Get(ctx, shortUrl interface{}) *gomock.Call {
+func (mr *MockUSUseCaseMockRecorder) Get(ctx, shortUrl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUrlShortenerUseCase)(nil).Get), ctx, shortUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUSUseCase)(nil).Get), ctx, shortUrl)
 }

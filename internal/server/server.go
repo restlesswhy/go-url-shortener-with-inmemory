@@ -41,9 +41,9 @@ func (s *Server) Run() error {
 	}
 	defer l.Close()
 	
-	shortenerInmemory := inmemory.NewUrlShortenerInmemory(s.memdb)
-	shortenerRepository := repository.NewUrlShortenerRepository(s.db)
-	shortenerUseCase := usecase.NewUrlShortenerUC(s.cfg, shortenerRepository, shortenerInmemory)
+	shortenerInmemory := inmemory.NewUSInmemory(s.memdb)
+	shortenerRepository := repository.NewUSRepository(s.db)
+	shortenerUseCase := usecase.NewUSUseCase(s.cfg, shortenerRepository, shortenerInmemory)
 
 	server := grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{
 		MaxConnectionIdle: s.cfg.Server.MaxConnectionIdle * time.Minute,
@@ -51,7 +51,7 @@ func (s *Server) Run() error {
 		MaxConnectionAge:  s.cfg.Server.MaxConnectionAge * time.Minute,
 		Time:              s.cfg.Server.Timeout * time.Minute,
 	}))
-	shortener := grpcdel.NewUrlShortenerMicroservice(s.cfg, shortenerUseCase)
+	shortener := grpcdel.NewUSMicroservice(s.cfg, shortenerUseCase)
 	shortenerService.RegisterUrlShortenerServiceServer(server, shortener)
 	
 	go func() {

@@ -12,54 +12,55 @@ import (
 	models "github.com/restlesswhy/grpc/url-shortener-microservice/internal/models"
 )
 
-// MockUrlShortenerRepository is a mock of UrlShortenerRepository interface.
-type MockUrlShortenerRepository struct {
+// MockUSRepository is a mock of USRepository interface.
+type MockUSRepository struct {
 	ctrl     *gomock.Controller
-	recorder *MockUrlShortenerRepositoryMockRecorder
+	recorder *MockUSRepositoryMockRecorder
 }
 
-// MockUrlShortenerRepositoryMockRecorder is the mock recorder for MockUrlShortenerRepository.
-type MockUrlShortenerRepositoryMockRecorder struct {
-	mock *MockUrlShortenerRepository
+// MockUSRepositoryMockRecorder is the mock recorder for MockUSRepository.
+type MockUSRepositoryMockRecorder struct {
+	mock *MockUSRepository
 }
 
-// NewMockUrlShortenerRepository creates a new mock instance.
-func NewMockUrlShortenerRepository(ctrl *gomock.Controller) *MockUrlShortenerRepository {
-	mock := &MockUrlShortenerRepository{ctrl: ctrl}
-	mock.recorder = &MockUrlShortenerRepositoryMockRecorder{mock}
+// NewMockUSRepository creates a new mock instance.
+func NewMockUSRepository(ctrl *gomock.Controller) *MockUSRepository {
+	mock := &MockUSRepository{ctrl: ctrl}
+	mock.recorder = &MockUSRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockUrlShortenerRepository) EXPECT() *MockUrlShortenerRepositoryMockRecorder {
+func (m *MockUSRepository) EXPECT() *MockUSRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CreateRepo mocks base method.
-func (m *MockUrlShortenerRepository) CreateRepo(ctx context.Context, longUrl, shortUrl string) error {
+// Create mocks base method.
+func (m *MockUSRepository) Create(ctx context.Context, longUrl, shortUrl string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateRepo", ctx, longUrl, shortUrl)
+	ret := m.ctrl.Call(m, "Create", ctx, longUrl, shortUrl)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CreateRepo indicates an expected call of CreateRepo.
-func (mr *MockUrlShortenerRepositoryMockRecorder) CreateRepo(ctx, longUrl, shortUrl interface{}) *gomock.Call {
+// Create indicates an expected call of Create.
+func (mr *MockUSRepositoryMockRecorder) Create(ctx, longUrl, shortUrl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRepo", reflect.TypeOf((*MockUrlShortenerRepository)(nil).CreateRepo), ctx, longUrl, shortUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUSRepository)(nil).Create), ctx, longUrl, shortUrl)
 }
 
-// GetRepo mocks base method.
-func (m *MockUrlShortenerRepository) GetRepo(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, bool) {
+// Get mocks base method.
+func (m *MockUSRepository) Get(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRepo", ctx, longUrl, shortUrl)
+	ret := m.ctrl.Call(m, "Get", ctx, longUrl, shortUrl)
 	ret0, _ := ret[0].(models.UrlsLS)
 	ret1, _ := ret[1].(bool)
-	return ret0, ret1
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-// GetRepo indicates an expected call of GetRepo.
-func (mr *MockUrlShortenerRepositoryMockRecorder) GetRepo(ctx, longUrl, shortUrl interface{}) *gomock.Call {
+// Get indicates an expected call of Get.
+func (mr *MockUSRepositoryMockRecorder) Get(ctx, longUrl, shortUrl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRepo", reflect.TypeOf((*MockUrlShortenerRepository)(nil).GetRepo), ctx, longUrl, shortUrl)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUSRepository)(nil).Get), ctx, longUrl, shortUrl)
 }

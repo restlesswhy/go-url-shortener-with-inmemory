@@ -7,7 +7,7 @@ import (
 	"github.com/restlesswhy/grpc/url-shortener-microservice/internal/models"
 )
 
-type UrlShortenerRepository interface {
-	CreateRepo(ctx context.Context, longUrl, shortUrl string) error
-	GetRepo(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, bool)
+type USRepository interface {
+	Create(ctx context.Context, longUrl, shortUrl string) error
+	Get(ctx context.Context, longUrl, shortUrl string) (models.UrlsLS, bool, error)
 }

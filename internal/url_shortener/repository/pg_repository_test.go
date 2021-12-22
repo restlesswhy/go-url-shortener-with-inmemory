@@ -20,7 +20,7 @@ func TestUrlShortenerRepository_CreateRepo(t *testing.T) {
 	sqlxDB := sqlx.NewDb(db, "sqlmock")
 	defer sqlxDB.Close()
 
-	shortRepo := NewUrlShortenerRepository(sqlxDB)
+	shortRepo := NewUSRepository(sqlxDB)
 
 	// columns := []string{"short_url", "long_url"}
 	mockUrl := models.UrlsLS{
@@ -36,7 +36,7 @@ func TestUrlShortenerRepository_CreateRepo(t *testing.T) {
 	// prep := mock.ExpectPrepare(query)
 	mock.ExpectExec(query).WithArgs(mockUrl.ShortUrl, mockUrl.LongUrl).WillReturnResult(sqlmock.NewResult(0, 0))
 
-	err = shortRepo.CreateRepo(context.Background(), mockUrl.LongUrl, mockUrl.ShortUrl)
+	err = shortRepo.Create(context.Background(), mockUrl.LongUrl, mockUrl.ShortUrl)
 
 	require.NoError(t, err)
 }
@@ -49,7 +49,7 @@ func TestUrlShortenerRepository_GetRepo(t *testing.T) {
 	sqlxDB := sqlx.NewDb(db, "sqlmock")
 	defer sqlxDB.Close()
 
-	shortRepo := NewUrlShortenerRepository(sqlxDB)
+	shortRepo := NewUSRepository(sqlxDB)
 
 	columns := []string{"short_url", "long_url"}
 	mockUrl := models.UrlsLS{
@@ -65,8 +65,9 @@ func TestUrlShortenerRepository_GetRepo(t *testing.T) {
 	// prep := mock.ExpectPrepare(query)
 	mock.ExpectQuery(query).WithArgs(mockUrl.LongUrl, mockUrl.ShortUrl).WillReturnRows(rows)
 
-	urls, isExist := shortRepo.GetRepo(context.Background(), mockUrl.LongUrl, mockUrl.ShortUrl)
+	urls, isExist, err := shortRepo.Get(context.Background(), mockUrl.LongUrl, mockUrl.ShortUrl)
 
+	require.Nil(t, err)
 	require.NotNil(t, urls)
 	require.Equal(t, mockUrl.ShortUrl, urls.ShortUrl)
 	require.True(t, isExist)
@@ -80,7 +81,7 @@ func TestUrlShortenerRepository_GetRepoNil(t *testing.T) {
 	sqlxDB := sqlx.NewDb(db, "sqlmock")
 	defer sqlxDB.Close()
 
-	shortRepo := NewUrlShortenerRepository(sqlxDB)
+	shortRepo := NewUSRepository(sqlxDB)
 
 	// columns := []string{"short_url", "long_url"}
 	mockUrl := models.UrlsLS{
@@ -96,7 +97,7 @@ func TestUrlShortenerRepository_GetRepoNil(t *testing.T) {
 	// prep := mock.ExpectPrepare(query)
 	mock.ExpectQuery(query).WithArgs(mockUrl.LongUrl, mockUrl.ShortUrl).WillReturnError(sql.ErrNoRows)
 
-	urls, isExist := shortRepo.GetRepo(context.Background(), mockUrl.LongUrl, mockUrl.ShortUrl)
+	urls, isExist, _ := shortRepo.Get(context.Background(), mockUrl.LongUrl, mockUrl.ShortUrl)
 
 	require.Equal(t, models.UrlsLS{}, urls)
 	// require.Equal(t, mockUrl.ShortUrl, urls.ShortUrl)

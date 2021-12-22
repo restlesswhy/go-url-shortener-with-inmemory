@@ -14,8 +14,8 @@ func TestUrlShortenerMicroservice_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	
-	shortUC := mock.NewMockUrlShortenerUseCase(ctrl)
-	shortServerGRPC := NewUrlShortenerMicroservice(nil, shortUC)
+	shortUC := mock.NewMockUSUseCase(ctrl)
+	shortServerGRPC := NewUSMicroservice(nil, shortUC)
 
 	reqValue := &shortenerService.UCRequest{
 		LongUrl: "https://translate.google.com/?hl=ru&sl=en&tl=ru&text=Parallel%20signals%20that%20this%20test%20is%20to%20be%20run%20in",
@@ -39,8 +39,8 @@ func TestUrlShortenerMicroservice_Get(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	
-	shortUC := mock.NewMockUrlShortenerUseCase(ctrl)
-	shortServerGRPC := NewUrlShortenerMicroservice(nil, shortUC)
+	shortUC := mock.NewMockUSUseCase(ctrl)
+	shortServerGRPC := NewUSMicroservice(nil, shortUC)
 
 	reqValue := &shortenerService.UGRequest{
 		ShortUrl: "bWY4CqPTMg",
