@@ -1,3 +1,4 @@
+//go:generate mockgen -source inmemory.go -destination mock/inmemory.go -package mock
 package urlshortener
 
 type UrlShortenerInmemory interface {

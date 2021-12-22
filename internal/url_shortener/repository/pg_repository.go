@@ -29,7 +29,7 @@ func (u *UrlShortenerRepository) CreateRepo(ctx context.Context, longUrl string,
 	logger.Info("creating new url in repo")
 
 	query := fmt.Sprintf("INSERT INTO %s (short_url, long_url) VALUES ($1, $2);", urlsTable)
-	_, err := u.db.Query(query, shortUrl, longUrl)
+	_, err := u.db.Exec(query, shortUrl, longUrl)
 	if err != nil {
 		return err
 	}

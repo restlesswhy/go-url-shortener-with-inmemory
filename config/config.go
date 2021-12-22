@@ -11,6 +11,12 @@ type Config struct {
 	Postgres  PostgresConfig
 	Server    ServerConfig
 	Shortener ShortenerConfig
+	CallAt CallAtConfig
+}
+
+type CallAtConfig struct {
+	SleepingTime time.Duration
+
 }
 
 type ServerConfig struct {
