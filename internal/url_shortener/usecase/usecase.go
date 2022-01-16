@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"crypto/sha512"
-	"sync"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,14 +36,10 @@ func NewUSUseCase(cfg *config.Config, shortenerRepo us.USRepository, memdb us.US
 // Create is create new short url
 func (u *USUseCase) Create(ctx context.Context, longUrl string) (string, error) {
 	// Запускаем проверку времени урлов в inmemory через синглтон
-	var once sync.Once
 	if singleInstance == nil {
-        once.Do(
-            func() {
-				u.CallAt(0, 0, 0, time.Hour, u.memdb.Check)
-                singleInstance = &single{}
-            })
-    }
+		u.CallAt(0, 0, 0, time.Hour, u.memdb.Check)
+		singleInstance = &single{}
+	}
 
 	logger.Infof("New creating with long url===============>%s", longUrl)
 
@@ -52,12 +47,12 @@ func (u *USUseCase) Create(ctx context.Context, longUrl string) (string, error) 
 		return "Your url is empty", nil
 	}
 	// Проверяем есть ли урл в локальном хранилище
-	shortUrl, err := u.memdb.GetShort(longUrl) 
+	shortUrl, err := u.memdb.GetShort(longUrl)
 	if err != nil {
 		return shortUrl, errors.Wrap(err, "memdb.GetShort")
 	}
 
-	if shortUrl == "" { 
+	if shortUrl == "" {
 		// Если локально урл не найден, ищем в базе
 		urls, ok, err := u.shortenerRepo.Get(ctx, longUrl, "")
 		if err != nil {
@@ -105,13 +100,13 @@ func (u *USUseCase) Get(ctx context.Context, shortUrl string) (string, error) {
 	logger.Infof("New getting with short url===============>%s", shortUrl)
 
 	// Проверяем есть ли урл локально
-	longUrl, err := u.memdb.GetLong(shortUrl) 
+	longUrl, err := u.memdb.GetLong(shortUrl)
 	if err != nil {
 		return "", errors.Wrap(err, "memdb.GetLong")
 	}
 
 	// Если локально длинный урл не найден ищем в базе
-	if longUrl == "" { 
+	if longUrl == "" {
 		urls, ok, err := u.shortenerRepo.Get(ctx, longUrl, shortUrl)
 		if err != nil {
 			return "", errors.Wrap(err, "shortenerRepo.Get")
@@ -140,7 +135,6 @@ func (u *USUseCase) GetUniqueString(longUrl string) (string, error) {
 	hash := sha512.New()
 	hash.Write([]byte(longUrl))
 	x := hash.Sum([]byte("some salt here"))
-	
 
 	hd := hashids.NewData()
 
@@ -161,7 +155,7 @@ func (u *USUseCase) GetUniqueString(longUrl string) (string, error) {
 	return e, nil
 }
 
-func (u *USUseCase) CallAt(hour, min, sec int, sleepingDuration time.Duration, f func() error ) error {
+func (u *USUseCase) CallAt(hour, min, sec int, sleepingDuration time.Duration, f func() error) error {
 	loc, err := time.LoadLocation("Local")
 	if err != nil {
 		return err
@@ -190,5 +184,3 @@ func (u *USUseCase) CallAt(hour, min, sec int, sleepingDuration time.Duration, f
 
 	return nil
 }
-
-

@@ -3,7 +3,6 @@ package grpcdel
 import (
 	"context"
 
-	"github.com/restlesswhy/grpc/url-shortener-microservice/config"
 	us "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener"
 	pb "github.com/restlesswhy/grpc/url-shortener-microservice/internal/url_shortener/proto"
 	"github.com/restlesswhy/grpc/url-shortener-microservice/pkg/logger"
@@ -11,13 +10,11 @@ import (
 
 type USMicroservice struct {
 	pb.UnimplementedUrlShortenerServiceServer
-	cfg *config.Config
 	shortenerUC us.USUseCase
 }
 
-func NewUSMicroservice(cfg *config.Config, shortenerUC us.USUseCase) *USMicroservice{
+func NewUSMicroservice(shortenerUC us.USUseCase) *USMicroservice{
 	return &USMicroservice{
-		cfg: cfg,
 		shortenerUC: shortenerUC,
 	}
 }

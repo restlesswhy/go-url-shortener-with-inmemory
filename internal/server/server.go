@@ -51,7 +51,7 @@ func (s *Server) Run() error {
 		MaxConnectionAge:  s.cfg.Server.MaxConnectionAge * time.Minute,
 		Time:              s.cfg.Server.Timeout * time.Minute,
 	}))
-	shortener := grpcdel.NewUSMicroservice(s.cfg, shortenerUseCase)
+	shortener := grpcdel.NewUSMicroservice(shortenerUseCase)
 	shortenerService.RegisterUrlShortenerServiceServer(server, shortener)
 	
 	go func() {
